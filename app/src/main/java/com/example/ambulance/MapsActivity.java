@@ -1,0 +1,272 @@
+package com.example.ambulance;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentActivity;
+
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.os.Build;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
+
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.tomtom.online.sdk.common.location.LatLngAcc;
+import com.tomtom.online.sdk.search.OnlineSearchApi;
+import com.tomtom.online.sdk.search.SearchApi;
+import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchQueryBuilder;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+
+    private GoogleMap googleMap;
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private static final int REQUEST_CODE = 101;
+    private Location currentLocation;
+    private Marker currentMarker, destinationMarker;
+    private LocationCallback locationCallback;
+    private Button pickupbtn, destinationbtn;
+    private SupportMapFragment supportMapFragment;
+    private LatLng startLatLng, endLatLng;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_maps);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        pickupbtn = (Button)findViewById(R.id.pickup_btn);
+        destinationbtn = (Button)findViewById(R.id.dest_btn);
+
+        locationCallback = new LocationCallback(){
+            @Override
+            public void onLocationResult(LocationResult locationResult)
+            {
+                currentLocation = locationResult.getLastLocation();
+                Log.d("Location : ", currentLocation.getLatitude() + "  " + currentLocation.getLongitude());
+                supportMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.google_map);
+                supportMapFragment.getMapAsync(MapsActivity.this);
+            }
+        };
+        startLocationUpdates();
+
+        // If this initialization of Places is not done then, on clicking on the button, the app will crash.
+
+        //if(Places.isInitialized() == false)
+            //Places.initialize(getApplicationContext(), getString(R.string.map_key));
+
+        //final List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
+
+        pickupbtn.setOnClickListener(new View.OnClickListener()
+        {
+
+            @Override
+            public void onClick(View view)
+            {
+                Intent intent = new Intent(getApplicationContext(), com.example.ambulance.AutocompleteActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        destinationbtn.setOnClickListener(new View.OnClickListener()
+        {
+
+            @Override
+            public void onClick(View view)
+            {
+                Intent intent = new Intent(getApplicationContext(), com.example.ambulance.AutocompleteActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
+
+    }
+
+    private void startLocationUpdates()
+    {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
+            return;
+        }
+
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setInterval(2000);
+        locationRequest.setFastestInterval(1000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
+
+        /*task.addOnSuccessListener(new OnSuccessListener<Location>()
+        {
+            @Override
+            public void onSuccess(Location location)
+            {
+                if(location != null)
+                {
+                    currentLocation = location;
+                    Toast.makeText(getApplicationContext(), currentLocation.getLatitude() + " " + currentLocation.getLongitude(), Toast.LENGTH_LONG).show();
+                    SupportMapFragment supportMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.google_map);
+                    supportMapFragment.getMapAsync(MapsActivity.this);
+                }
+            }
+        });*/
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap)
+    {
+        this.googleMap = googleMap;
+        LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+
+        if(currentMarker == null)
+        {
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(latLng);
+            markerOptions.title("I'm Here");
+            this.googleMap.setMyLocationEnabled(true);
+            this.googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+            this.googleMap.getUiSettings().setCompassEnabled(true);
+            this.googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 19));
+            currentMarker = this.googleMap.addMarker(markerOptions);
+
+            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+            try
+            {
+                List<Address> list = geocoder.getFromLocation(currentLocation.getLatitude(), currentLocation.getLongitude(), 1);
+                String address = list.get(0).getAddressLine(0);
+                pickupbtn.setText(address);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+
+        }
+        else
+            currentMarker.setPosition(latLng);
+
+        View myLocationButton =  ((View)supportMapFragment.getView().findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+        RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) myLocationButton.getLayoutParams();
+
+        rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        rlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+        rlp.setMargins(400, 1100, 0, 0);
+
+        if(Build.VERSION.SDK_INT >= 17)
+            rlp.addRule(RelativeLayout.ALIGN_PARENT_END);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch(requestCode)
+        {
+            case REQUEST_CODE:
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    startLocationUpdates();
+                break;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 200)
+        {
+            if (resultCode == RESULT_OK)
+            {
+                Place place_pickup = Autocomplete.getPlaceFromIntent(data);
+                String name = place_pickup.getName().toString();
+                startLatLng = place_pickup.getLatLng();
+                pickupbtn.setText(name);
+
+                if (currentMarker == null)
+                {
+                    MarkerOptions options = new MarkerOptions();
+                    options.title("Pickup");
+                    options.position(startLatLng);
+
+                    currentMarker = googleMap.addMarker(options);
+                }
+                else
+                    currentMarker.setPosition(startLatLng);
+            }
+            else if(resultCode == AutocompleteActivity.RESULT_ERROR)
+            {
+                Status status = Autocomplete.getStatusFromIntent(data);
+                Log.d("Error: ", status.getStatusMessage());
+            }
+            else if(resultCode == RESULT_CANCELED)
+            {
+
+            }
+        }
+        else if (requestCode == 400)
+        {
+            if (resultCode == RESULT_OK)
+            {
+                Place place_destination = Autocomplete.getPlaceFromIntent(data);
+                String name = place_destination.getName().toString();
+                endLatLng = place_destination.getLatLng();
+                destinationbtn.setText(name);
+
+                if (destinationMarker == null)
+                {
+                    MarkerOptions options = new MarkerOptions();
+                    options.title("Destination");
+                    options.position(endLatLng);
+                    destinationMarker = googleMap.addMarker(options);
+                }
+                else
+                    destinationMarker.setPosition(endLatLng);
+            }
+            else if(resultCode == AutocompleteActivity.RESULT_ERROR)
+            {
+                Status status = Autocomplete.getStatusFromIntent(data);
+                Log.d("Error: ", status.getStatusMessage());
+            }
+            else if(resultCode == RESULT_CANCELED)
+            {
+
+            }
+        }
+    }
+}
+
+//https://maps.googleapis.com/maps/api/place/findplacefromtext/json?&inputtype=textquery&input=apollo&key=AIzaSyBt6dqua_Hr_AhCk0gJm9Kxh5X6DJBLYz8&fields=formatted_address,geometry,icon,name,permanently_closed,photos,place_id,plus_code,types

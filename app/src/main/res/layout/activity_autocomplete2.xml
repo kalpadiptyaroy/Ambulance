@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AutocompleteActivity"
+    android:theme="@style/PlacesAutocompleteOverlay">
+
+    <AutoCompleteTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/autocomplete"
+        android:hint="Enter Location"
+        android:textAlignment="center"
+        android:textSize="25dp"
+        android:layout_marginTop="30dp"
+        android:drawableBottom="@color/cardview_light_background"/>
+
+
+
+</RelativeLayout>
