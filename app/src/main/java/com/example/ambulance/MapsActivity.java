@@ -24,11 +24,13 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
@@ -97,7 +99,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View view)
             {
                 Intent intent = new Intent(getApplicationContext(), com.example.ambulance.AutocompleteActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, 200);
             }
         });
 
@@ -108,7 +110,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View view)
             {
                 Intent intent = new Intent(getApplicationContext(), com.example.ambulance.AutocompleteActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent,400);
+
             }
         });
 
@@ -211,9 +214,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         {
             if (resultCode == RESULT_OK)
             {
-                Place place_pickup = Autocomplete.getPlaceFromIntent(data);
-                String name = place_pickup.getName().toString();
-                startLatLng = place_pickup.getLatLng();
+                Bundle bundle = data.getExtras();
+                String name = bundle.get("selected_text").toString();
+                double lat = Double.parseDouble(bundle.get("latitude").toString());
+                double lng = Double.parseDouble(bundle.get("longitude").toString());
+                startLatLng = new LatLng(lat, lng);
                 pickupbtn.setText(name);
 
                 if (currentMarker == null)
@@ -221,11 +226,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     MarkerOptions options = new MarkerOptions();
                     options.title("Pickup");
                     options.position(startLatLng);
-
                     currentMarker = googleMap.addMarker(options);
                 }
                 else
                     currentMarker.setPosition(startLatLng);
+
+                if(destinationMarker != null)
+                {
+                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                    builder.include(currentMarker.getPosition());
+                    builder.include(destinationMarker.getPosition());
+
+                    LatLngBounds bounds = builder.build();
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 100);
+                }
+
+
             }
             else if(resultCode == AutocompleteActivity.RESULT_ERROR)
             {
@@ -241,9 +257,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         {
             if (resultCode == RESULT_OK)
             {
-                Place place_destination = Autocomplete.getPlaceFromIntent(data);
-                String name = place_destination.getName().toString();
-                endLatLng = place_destination.getLatLng();
+                Bundle bundle = data.getBundleExtra("place");
+                String name = bundle.getString("name");
+                double lat = Double.parseDouble(bundle.getString("latitude"));
+                double lng = Double.parseDouble(bundle.getString("longitude"));
+                endLatLng = new LatLng(lat, lng);
                 destinationbtn.setText(name);
 
                 if (destinationMarker == null)
@@ -255,6 +273,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 else
                     destinationMarker.setPosition(endLatLng);
+
+                if(currentMarker != null)
+                {
+                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                    builder.include(currentMarker.getPosition());
+                    builder.include(destinationMarker.getPosition());
+
+                    LatLngBounds bounds = builder.build();
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 100);
+                    googleMap.animateCamera(cameraUpdate);
+                }
             }
             else if(resultCode == AutocompleteActivity.RESULT_ERROR)
             {
@@ -269,4 +298,4 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 }
 
-//https://maps.googleapis.com/maps/api/place/findplacefromtext/json?&inputtype=textquery&input=apollo&key=AIzaSyBt6dqua_Hr_AhCk0gJm9Kxh5X6DJBLYz8&fields=formatted_address,geometry,icon,name,permanently_closed,photos,place_id,plus_code,types
+//https://maps.googleapis.com/maps/api/place/findplacefromtext/json?&inputtype=textquery&input=apollo&key=AIzaSyBt6dqua_Hr_AhCk0gJm9Kxh5X6DJBLYz8&fields=formatted_address,geometry,icon,name,permanently_closed,photos,place_id,plus_code,types&sessiontoken=12345
