@@ -68,4 +68,11 @@ public class SignInActivity extends AppCompatActivity
             });
         }
     }
+
+    public void signUpUser(View v)
+    {
+        Intent intent = new Intent(SignInActivity.this, SignUpActivity.class);
+        startActivity(intent);
+        finish();
+    }
 }

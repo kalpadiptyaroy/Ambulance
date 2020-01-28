@@ -296,6 +296,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     }
+
+    public void goToPay(View view)
+    {
+        Intent intent = new Intent(MapsActivity.this, PaymentGateway.class);
+        startActivity(intent);
+
+    }
 }
 
 //https://maps.googleapis.com/maps/api/place/findplacefromtext/json?&inputtype=textquery&input=apollo&key=AIzaSyBt6dqua_Hr_AhCk0gJm9Kxh5X6DJBLYz8&fields=formatted_address,geometry,icon,name,permanently_closed,photos,place_id,plus_code,types&sessiontoken=12345

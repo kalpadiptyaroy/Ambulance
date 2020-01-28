@@ -17,13 +17,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Profile"/>
-        <activity android:name=".MainPageActivity"
+        <activity android:name=".RideConfirmActivity"></activity>
+        <activity android:name=".PaymentGateway" />
+        <activity android:name=".SplashActivity" />
+        <activity android:name=".Profile" />
+        <activity
+            android:name=".MainPageActivity"
             android:label="@string/title_activity_main_page"
-            android:theme="@style/AppTheme"/>
-        <activity android:name=".SignInActivity" />
-        <activity android:name=".SignUpActivity" />
+            android:theme="@style/AppTheme" />
         <activity android:name=".MapsActivity" />
+        <activity android:name=".SignUpActivity" />
+        <activity android:name=".MainActivity" />
         <activity android:name=".AutocompleteActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -43,8 +47,7 @@
             android:name="OnlineSearch.Key"
             android:value="@string/tomtomkey" />
 
-
-        <activity android:name=".MainActivity">
+        <activity android:name=".SignInActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

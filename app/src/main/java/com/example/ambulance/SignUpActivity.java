@@ -20,7 +20,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class SignUpActivity extends AppCompatActivity
 {
-    EditText e4, e5, e6, e7;
+    EditText e4, e5, e6, e7, e8;
     FirebaseAuth auth;
     ProgressDialog dialog;
     DatabaseReference databaseReference;
@@ -36,6 +36,7 @@ public class SignUpActivity extends AppCompatActivity
         e5 = findViewById(R.id.email_up);
         e6 = findViewById(R.id.password_up);
         e7 = findViewById(R.id.phone_up);
+        e8 = findViewById(R.id.confirm_password_up);
         auth = FirebaseAuth.getInstance();
         dialog = new ProgressDialog(this);
     }
@@ -49,9 +50,14 @@ public class SignUpActivity extends AppCompatActivity
         String email = e5.getText().toString();
         String password = e6.getText().toString();
         String phone = e7.getText().toString();
+        String confirm_password = e8.getText().toString();
         if (name.equals("") || email.equals("") && password.equals("") && phone.equals(""))
         {
             Toast.makeText(getApplicationContext(), "Field cannot be empty!", Toast.LENGTH_SHORT).show();
+        }
+        else if(password.equals(confirm_password) == false)
+        {
+            Toast.makeText(getApplicationContext(), "Confirm Password did not match", Toast.LENGTH_LONG).show();
         }
         else
         {

@@ -2,6 +2,8 @@ package com.example.ambulance.models;
 
 import android.util.Log;
 
+import com.example.ambulance.Place;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,11 +15,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
+
+
 public class PlacesApi
 {
-    public ArrayList<String> autocomplete(String input)
+    public ArrayList<Place> autocomplete(String input)
     {
-        ArrayList<String> arrayList = new ArrayList<String>();
+        ArrayList<Place> arrayList = new ArrayList<Place>();
         HttpURLConnection connection = null;
         StringBuilder jsonResult = new StringBuilder();
         try
@@ -28,7 +32,7 @@ public class PlacesApi
 
             StringBuilder sb=new StringBuilder("https://maps.googleapis.com/maps/api/place/findplacefromtext/json?&inputtype=textquery");
             sb.append("&input="+input);
-            sb.append("&key=AIzaSyBt6dqua_Hr_AhCk0gJm9Kxh5X6DJBLYz8&fields=formatted_address,geometry,icon,name,permanently_closed,photos,place_id,plus_code,types");
+            sb.append("&key=AIzaSyBt6dqua_Hr_AhCk0gJm9Kxh5X6DJBLYz8&fields=formatted_address,geometry,icon,name,permanently_closed,photos,place_id,plus_code,types&sessiontoken=12345");
             URL url=new URL(sb.toString());
             connection=(HttpURLConnection)url.openConnection();
             InputStreamReader inputStreamReader=new InputStreamReader(connection.getInputStream());
@@ -61,11 +65,17 @@ public class PlacesApi
         try
         {
             JSONObject jsonObject=new JSONObject(jsonResult.toString());
-            JSONArray prediction=jsonObject.getJSONArray("candidates");
-            for(int i=0;i<prediction.length();i++)
-            {
-                arrayList.add(prediction.getJSONObject(i).getString("name"));
-            }
+            JSONArray candidates=jsonObject.getJSONArray("candidates");
+
+            //Commented it out bevause there is only on elelemt in candidate json array.
+            //for(int i=0;i<candidates.length();i++)
+            //{
+                String lat = candidates.getJSONObject(0).getJSONObject("geometry").getJSONObject("location").getString("lat");
+                String lng = candidates.getJSONObject(0).getJSONObject("geometry").getJSONObject("location").getString("lng");
+                String name = candidates.getJSONObject(0).getString("name");
+                Place p = new Place(name, Double.parseDouble(lat), Double.parseDouble(lng));
+                arrayList.add(p);
+            //}
         }
 
         catch (JSONException e)

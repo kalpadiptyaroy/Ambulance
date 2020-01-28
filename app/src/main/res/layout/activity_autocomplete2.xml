@@ -4,19 +4,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AutocompleteActivity"
-    android:theme="@style/PlacesAutocompleteOverlay">
+    tools:context=".AutocompleteActivity">
 
     <AutoCompleteTextView
-        android:layout_width="match_parent"
+        android:layout_width="350dp"
         android:layout_height="wrap_content"
         android:id="@+id/autocomplete"
         android:hint="Enter Location"
         android:textAlignment="center"
         android:textSize="25dp"
         android:layout_marginTop="30dp"
-        android:drawableBottom="@color/cardview_light_background"/>
+        android:layout_marginLeft="5dp"
+        android:theme="@style/PlacesAutocompleteOverlay"/>
 
+    <Button
+        android:layout_width="200dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="110dp"
+        android:layout_marginLeft="80dp"
+        android:text="CONFIRM"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:background="#038CF4"
+        android:textSize="20dp"
+        android:id="@+id/confirmbtn">
 
+    </Button>
 
 </RelativeLayout>
