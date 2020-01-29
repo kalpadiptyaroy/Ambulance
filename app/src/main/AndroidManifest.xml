@@ -12,14 +12,14 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ambulance_icon"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/ambulance_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".RideConfirmActivity"></activity>
         <activity android:name=".PaymentGateway" />
-        <activity android:name=".SplashActivity" />
+        <activity android:name=".SignInActivity" />
         <activity android:name=".Profile" />
         <activity
             android:name=".MainPageActivity"
@@ -47,7 +47,7 @@
             android:name="OnlineSearch.Key"
             android:value="@string/tomtomkey" />
 
-        <activity android:name=".SignInActivity">
+        <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -71,7 +71,6 @@ import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 {
-
     private GoogleMap googleMap;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private static final int REQUEST_CODE = 101;
@@ -316,11 +315,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         }
+
     }
 
     public void goToPay(View view)
     {
         Intent intent = new Intent(MapsActivity.this, PaymentGateway.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("pickup_latitude", currentMarker.getPosition().latitude + "");
+        bundle.putString("pickup_longitude", currentMarker.getPosition().longitude + "");
+        bundle.putString("destination_latitude", destinationMarker.getPosition().latitude + "");
+        bundle.putString("destination_longitude", destinationMarker.getPosition().longitude + "");
+        intent.putExtra("ride", bundle);
         startActivity(intent);
 
     }
@@ -330,6 +336,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Intent intent = new Intent(MapsActivity.this, SignInActivity.class);
         startActivity(intent);
     }
+
 
 }
 
