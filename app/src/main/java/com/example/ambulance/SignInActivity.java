@@ -55,7 +55,7 @@ public class SignInActivity extends AppCompatActivity
 
                         dialog.hide();
                         Toast.makeText(getApplicationContext(),"User Successfully sign in!",Toast.LENGTH_SHORT).show();
-                        Intent i=new Intent(SignInActivity.this,MapsActivity.class);
+                        Intent i=new Intent(SignInActivity.this,MainPageActivity.class);
                         startActivity(i);
                         finish();
                     }

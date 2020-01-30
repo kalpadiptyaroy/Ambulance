@@ -37,7 +37,8 @@ public class MainPageActivity extends AppCompatActivity  implements NavigationVi
     TextView t1, t2;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_page);
 
@@ -175,5 +176,11 @@ public class MainPageActivity extends AppCompatActivity  implements NavigationVi
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void goToMap(View view)
+    {
+        Intent intent = new Intent(MainPageActivity.this, MapsActivity.class);
+        startActivity(intent);
     }
 }
