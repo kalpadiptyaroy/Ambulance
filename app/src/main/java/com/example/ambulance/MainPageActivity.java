@@ -132,7 +132,7 @@ public class MainPageActivity extends AppCompatActivity  implements NavigationVi
 
         if (id == R.id.nav_profile)
         {
-            Intent p=new Intent(MainPageActivity.this, ContactsContract.Profile.class);
+            Intent p=new Intent(MainPageActivity.this,Profile.class);
             startActivity(p);
             finish();
         }
