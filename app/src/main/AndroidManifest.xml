@@ -17,7 +17,8 @@
         android:roundIcon="@drawable/ambulance_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".RideConfirmActivity"></activity>
+        <activity android:name=".SignUpDriverActivity"></activity>
+        <activity android:name=".RideConfirmActivity" />
         <activity android:name=".PaymentGateway" />
         <activity android:name=".SignInActivity" />
         <activity android:name=".Profile" />

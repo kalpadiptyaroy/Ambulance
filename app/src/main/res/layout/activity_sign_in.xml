@@ -65,10 +65,19 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sign UP"
+        android:text="Sign UP (USER)"
         android:textSize="22sp"
         android:textColor="#ffffff"
         android:layout_marginTop="12dp"
         android:background="@drawable/button_rounded"
         android:onClick="signUpUser" />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sign UP (DRIVER)"
+        android:textSize="22sp"
+        android:textColor="#ffffff"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/button_rounded"
+        android:onClick="signUpDriver" />
 </LinearLayout>

@@ -10,6 +10,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -81,6 +82,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private SupportMapFragment supportMapFragment;
     private LatLng startLatLng, endLatLng;
 
+//      FirebaseAuth auth;
+//      DatabaseReference databaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -90,6 +93,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         pickupbtn = (Button)findViewById(R.id.pickup_btn);
         destinationbtn = (Button)findViewById(R.id.dest_btn);
+ //         auth = FirebaseAuth.getInstance();
 
         locationCallback = new LocationCallback(){
             @Override

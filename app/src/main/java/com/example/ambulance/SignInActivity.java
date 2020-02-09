@@ -75,4 +75,11 @@ public class SignInActivity extends AppCompatActivity
         startActivity(intent);
         finish();
     }
+
+    public void signUpDriver(View v)
+    {
+        Intent intent = new Intent(SignInActivity.this, SignUpDriverActivity.class);
+        startActivity(intent);
+        finish();
+    }
 }

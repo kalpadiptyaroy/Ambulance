@@ -3,9 +3,9 @@ package com.example.ambulance;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.Bundle;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -18,8 +18,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class SignUpActivity extends AppCompatActivity
-{
+public class SignUpDriverActivity extends AppCompatActivity {
+
     EditText e4, e5, e6, e7, e8;
     FirebaseAuth auth;
     ProgressDialog dialog;
@@ -28,21 +28,21 @@ public class SignUpActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sign_up);
+        setContentView(R.layout.activity_sign_up_driver);
 
 
 
-        e4 = findViewById(R.id.name);
-        e5 = findViewById(R.id.email_up);
-        e6 = findViewById(R.id.password_up);
-        e7 = findViewById(R.id.phone_up);
-        e8 = findViewById(R.id.confirm_password_up);
+        e4 = findViewById(R.id.name_driver);
+        e5 = findViewById(R.id.email_up_driver);
+        e6 = findViewById(R.id.password_up_driver);
+        e7 = findViewById(R.id.phone_up_driver);
+        e8 = findViewById(R.id.confirm_password_up_driver);
         auth = FirebaseAuth.getInstance();
         dialog = new ProgressDialog(this);
     }
 
 
-    public void signupUser(View V)
+    public void signupDriver(View V)
     {
         dialog.setMessage("Registering... Please wait");
         dialog.show();
@@ -69,23 +69,23 @@ public class SignUpActivity extends AppCompatActivity
                     if (task.isSuccessful())
                     {
                         dialog.hide();
-                        Toast.makeText(getApplicationContext(), "User Successfully Registered!", Toast.LENGTH_SHORT).show();
-                        databaseReference = FirebaseDatabase.getInstance().getReference().child("Users");
-                        Users user_object = new Users(e4.getText().toString(), e5.getText().toString(), e6.getText().toString(), e7.getText().toString());
+                        Toast.makeText(getApplicationContext(), "Driver Successfully Registered!", Toast.LENGTH_SHORT).show();
+                        databaseReference = FirebaseDatabase.getInstance().getReference().child("Drivers");
+                        Drivers drivers_object = new Drivers(e4.getText().toString(), e5.getText().toString(), e6.getText().toString(), e7.getText().toString());
                         FirebaseUser firebaseUser = auth.getCurrentUser();
-                        databaseReference.child(firebaseUser.getUid()).setValue(user_object).addOnCompleteListener(new OnCompleteListener<Void>()
+                        databaseReference.child(firebaseUser.getUid()).setValue(drivers_object).addOnCompleteListener(new OnCompleteListener<Void>()
                         {
                             @Override
                             public void onComplete(@NonNull Task<Void> task)
                             {
                                 if (task.isSuccessful()) {
-                                    Toast.makeText(getApplicationContext(), "User Data saved", Toast.LENGTH_LONG).show();
-                                    Intent i = new Intent(SignUpActivity.this, MainPageActivity.class);
+                                    Toast.makeText(getApplicationContext(), "Driver Data saved", Toast.LENGTH_LONG).show();
+                                    Intent i = new Intent(SignUpDriverActivity.this, MainPageActivity.class);
                                     startActivity(i);
 
 
                                 } else {
-                                    Toast.makeText(getApplicationContext(), "User Data could not be saved", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getApplicationContext(), "Driver Data could not be saved", Toast.LENGTH_LONG).show();
                                 }
 
                             }
@@ -95,10 +95,11 @@ public class SignUpActivity extends AppCompatActivity
                     else
                     {
                         dialog.hide();
-                        Toast.makeText(getApplicationContext(), "User could not be registered", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Driver could not be registered", Toast.LENGTH_SHORT).show();
                     }
-                }
+                };
             });
         }
     }
+
 }
