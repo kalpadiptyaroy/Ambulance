@@ -18,7 +18,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class SignUpDriverActivity extends AppCompatActivity {
+public class SignUpDriverActivity extends AppCompatActivity
+{
 
     EditText e4, e5, e6, e7, e8;
     FirebaseAuth auth;
@@ -26,11 +27,10 @@ public class SignUpDriverActivity extends AppCompatActivity {
     DatabaseReference databaseReference;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up_driver);
-
-
 
         e4 = findViewById(R.id.name_driver);
         e5 = findViewById(R.id.email_up_driver);
@@ -41,8 +41,7 @@ public class SignUpDriverActivity extends AppCompatActivity {
         dialog = new ProgressDialog(this);
     }
 
-
-    public void signupDriver(View V)
+    public void signUpDriver(View V)
     {
         dialog.setMessage("Registering... Please wait");
         dialog.show();
@@ -51,6 +50,7 @@ public class SignUpDriverActivity extends AppCompatActivity {
         String password = e6.getText().toString();
         String phone = e7.getText().toString();
         String confirm_password = e8.getText().toString();
+
         if (name.equals("") || email.equals("") && password.equals("") && phone.equals(""))
         {
             Toast.makeText(getApplicationContext(), "Field cannot be empty!", Toast.LENGTH_SHORT).show();
@@ -78,13 +78,14 @@ public class SignUpDriverActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<Void> task)
                             {
-                                if (task.isSuccessful()) {
+                                if (task.isSuccessful())
+                                {
                                     Toast.makeText(getApplicationContext(), "Driver Data saved", Toast.LENGTH_LONG).show();
                                     Intent i = new Intent(SignUpDriverActivity.this, MainPageActivity.class);
                                     startActivity(i);
-
-
-                                } else {
+                                }
+                                else
+                                {
                                     Toast.makeText(getApplicationContext(), "Driver Data could not be saved", Toast.LENGTH_LONG).show();
                                 }
 
@@ -101,5 +102,4 @@ public class SignUpDriverActivity extends AppCompatActivity {
             });
         }
     }
-
 }

@@ -2,7 +2,7 @@ package com.example.ambulance;
 
 public class Users
 {
-    public String name,email,password,phone;
+    public String name,email,password,phone, latitude ,longitude;
 
     public Users(String name, String email, String password, String phone)
     {
@@ -10,5 +10,13 @@ public class Users
         this.email = email;
         this.password = password;
         this.phone=phone;
+        this.latitude="";
+        this.longitude="";
+    }
+
+    public Users(String latitude, String longitude)
+    {
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 }

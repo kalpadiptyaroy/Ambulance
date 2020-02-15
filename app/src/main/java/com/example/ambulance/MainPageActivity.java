@@ -29,11 +29,12 @@ import android.view.Menu;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainPageActivity extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener {
+public class MainPageActivity extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener
+{
     FirebaseAuth auth;
     FirebaseUser user;
     String user_id;
-    DatabaseReference reference;
+    DatabaseReference reference, driver_reference;
     TextView t1, t2;
 
     @Override
@@ -52,6 +53,7 @@ public class MainPageActivity extends AppCompatActivity  implements NavigationVi
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
         user = FirebaseAuth.getInstance().getCurrentUser();
+
         if (user == null)
         {
             Intent myintent = new Intent(MainPageActivity.this, MainActivity.class);
@@ -62,6 +64,7 @@ public class MainPageActivity extends AppCompatActivity  implements NavigationVi
         {
             user_id = user.getUid();
             reference = FirebaseDatabase.getInstance().getReference().child("Users").child(user_id);
+            driver_reference = FirebaseDatabase.getInstance().getReference().child("Drivers").child(user_id);
             reference.addValueEventListener(new ValueEventListener()
             {
                 @Override

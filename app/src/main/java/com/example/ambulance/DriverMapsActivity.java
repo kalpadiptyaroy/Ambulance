@@ -1,24 +1,35 @@
 package com.example.ambulance;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class DriverMapsActivity extends FragmentActivity implements OnMapReadyCallback
 {
@@ -29,29 +40,34 @@ public class DriverMapsActivity extends FragmentActivity implements OnMapReadyCa
     private Location currentLocation;
     private SupportMapFragment supportMapFragment;
     private static final int REQUEST_CODE = 101;
+    FirebaseAuth auth;
+    DatabaseReference databaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver_maps);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        auth = FirebaseAuth.getInstance();
 
         locationCallback = new LocationCallback(){
             @Override
             public void onLocationResult(LocationResult locationResult)
             {
                 currentLocation = locationResult.getLastLocation();
+                databaseReference = FirebaseDatabase.getInstance().getReference().child("Drivers");
+                FirebaseUser firebaseUser = auth.getCurrentUser();
 
-                /*
                 Log.d("Location : ", currentLocation.getLatitude() + "  " + currentLocation.getLongitude());
-
-                Here we have to send the current location to the database.
-                */
+                uploadLocation(firebaseUser, currentLocation.getLatitude(), currentLocation.getLongitude());
 
                 supportMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.google_map);
                 supportMapFragment.getMapAsync(DriverMapsActivity.this);
             }
         };
+
+        startLocationUpdates();
     }
 
 
@@ -107,5 +123,33 @@ public class DriverMapsActivity extends FragmentActivity implements OnMapReadyCa
                 }
             }
         });*/
+    }
+
+    public void uploadLocation(FirebaseUser firebaseUser, double latitude, double longitude)
+    {
+        databaseReference.child(firebaseUser.getUid()).child("latitude").setValue(currentLocation.getLatitude()).addOnCompleteListener(new OnCompleteListener<Void>()
+        {
+            @Override
+            public void onComplete(@NonNull Task<Void> task)
+            {
+                if (task.isSuccessful() == false)
+                {
+                    Toast.makeText(getApplicationContext(), "Location Upload Failed", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+
+        databaseReference.child(firebaseUser.getUid()).child("longitude").setValue(currentLocation.getLongitude()).addOnCompleteListener(new OnCompleteListener<Void>()
+        {
+            @Override
+            public void onComplete(@NonNull Task<Void> task)
+            {
+                if (task.isSuccessful() == false)
+                {
+                    Toast.makeText(getApplicationContext(), "Location Upload Failed", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 }

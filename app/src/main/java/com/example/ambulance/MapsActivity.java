@@ -2,27 +2,22 @@ package com.example.ambulance;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -39,32 +34,23 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.AutocompletePrediction;
-import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
-import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
-import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.tomtom.online.sdk.common.location.LatLngAcc;
-import com.tomtom.online.sdk.search.OnlineSearchApi;
-import com.tomtom.online.sdk.search.SearchApi;
-import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchQueryBuilder;
 
+
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Arrays;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.HashMap;
+import com.google.android.gms.maps.model.PolylineOptions;
+
+import org.json.JSONObject;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
@@ -78,6 +64,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Button pickupbtn, destinationbtn;
     private SupportMapFragment supportMapFragment;
     private LatLng startLatLng, endLatLng;
+    ArrayList markerPoints = new ArrayList();
 
 //      FirebaseAuth auth;
 //      DatabaseReference databaseReference;
@@ -176,6 +163,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         this.googleMap = googleMap;
         LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
 
+
+
         if(currentMarker == null)
         {
             MarkerOptions markerOptions = new MarkerOptions();
@@ -212,6 +201,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if(Build.VERSION.SDK_INT >= 17)
             rlp.addRule(RelativeLayout.ALIGN_PARENT_END);
+
+
+
     }
 
     @Override
@@ -231,6 +223,99 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
+
+        class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+            // Parsing the data in non-ui thread
+            @Override
+            protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+
+                JSONObject jObject;
+                List<List<HashMap<String, String>>> routes = null;
+
+                try
+                {
+                    jObject = new JSONObject(jsonData[0]);
+                    DirectionsJSONParser parser = new DirectionsJSONParser();
+
+                    routes = parser.parse(jObject);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+                return routes;
+            }
+
+            @Override
+            protected void onPostExecute(List<List<HashMap<String, String>>> result) {
+                ArrayList points = null;
+                PolylineOptions lineOptions = null;
+                MarkerOptions markerOptions = new MarkerOptions();
+
+                for (int i = 0; i < result.size(); i++) {
+                    points = new ArrayList();
+                    lineOptions = new PolylineOptions();
+
+                    List<HashMap<String, String>> path = result.get(i);
+
+                    for (int j = 0; j < path.size(); j++) {
+                        HashMap point = path.get(j);
+
+                        double lat = Double.parseDouble(point.get("lat").toString());
+                        double lng = Double.parseDouble(point.get("lng").toString());
+                        LatLng position = new LatLng(lat, lng);
+
+                        points.add(position);
+                    }
+
+                    lineOptions.addAll(points);
+                    lineOptions.width(12);
+                    lineOptions.color(Color.RED);
+                    lineOptions.geodesic(true);
+
+                }
+
+// Drawing polyline in the Google Map for the i-th route
+                googleMap.addPolyline(lineOptions);
+            }
+        }
+        class DownloadTask extends AsyncTask
+        {
+
+            protected String doInBackground(String... url)
+            {
+
+                String data = "";
+                try
+                {
+                    data = downloadUrl(url[0]);
+                }
+                catch (Exception e)
+                {
+                    Log.d("Background Task", e.toString());
+                }
+                return data;
+            }
+
+            protected void onPostExecute(String result)
+            {
+                super.onPostExecute(result);
+
+                ParserTask parserTask = new ParserTask();
+
+
+                parserTask.execute(result);
+
+            }
+
+            @Override
+            protected Object doInBackground(Object[] objects)
+            {
+                return null;
+            }
+        }
+
         if (requestCode == 200)
         {
             if (resultCode == RESULT_OK)
@@ -258,8 +343,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     builder.include(currentMarker.getPosition());
                     builder.include(destinationMarker.getPosition());
 
+                    String url = getDirectionsUrl(currentMarker.getPosition(), destinationMarker.getPosition());
+
                     LatLngBounds bounds = builder.build();
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 100);
+
+                    DownloadTask downloadTask = new DownloadTask();
+                    downloadTask.execute(url);
                 }
 
 
@@ -274,10 +364,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         }
-        else if (requestCode == 400)
-        {
-            if (resultCode == RESULT_OK)
-            {
+        else if (requestCode == 400) {
+            if (resultCode == RESULT_OK) {
                 Bundle bundle = data.getBundleExtra("place");
                 String name = bundle.getString("name");
                 double lat = Double.parseDouble(bundle.getString("latitude"));
@@ -285,18 +373,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 endLatLng = new LatLng(lat, lng);
                 destinationbtn.setText(name);
 
-                if (destinationMarker == null)
-                {
+                if (destinationMarker == null) {
                     MarkerOptions options = new MarkerOptions();
                     options.title("Destination");
                     options.position(endLatLng);
                     destinationMarker = googleMap.addMarker(options);
-                }
-                else
+                } else
                     destinationMarker.setPosition(endLatLng);
 
-                if(currentMarker != null)
-                {
+                if (currentMarker != null) {
                     LatLngBounds.Builder builder = new LatLngBounds.Builder();
                     builder.include(currentMarker.getPosition());
                     builder.include(destinationMarker.getPosition());
@@ -305,18 +390,78 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 100);
                     googleMap.animateCamera(cameraUpdate);
                 }
-            }
-            else if(resultCode == AutocompleteActivity.RESULT_ERROR)
-            {
+            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Status status = Autocomplete.getStatusFromIntent(data);
                 Log.d("Error: ", status.getStatusMessage());
-            }
-            else if(resultCode == RESULT_CANCELED)
-            {
+            } else if (resultCode == RESULT_CANCELED) {
 
             }
         }
+    }
+    private String downloadUrl(String strUrl)throws IOException
+    {
+        String data = "";
+        InputStream iStream = null;
+        HttpURLConnection urlConnection = null;
+        try
+        {
+            URL url = new URL(strUrl);
 
+            urlConnection = (HttpURLConnection) url.openConnection();
+
+            urlConnection.connect();
+
+            iStream = urlConnection.getInputStream();
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
+
+            StringBuffer sb = new StringBuffer();
+
+            String line = "";
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+
+            data = sb.toString();
+
+            br.close();
+
+        }
+        catch (Exception e)
+        {
+            Log.d("Exception", e.toString());
+        }
+        finally
+        {
+            iStream.close();
+            urlConnection.disconnect();
+        }
+        return data;
+    }
+
+    private String getDirectionsUrl(LatLng origin, LatLng dest) {
+
+        // Origin of route
+        String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
+
+        // Destination of route
+        String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
+
+        // Sensor enabled
+        String sensor = "sensor=false";
+        String mode = "mode=driving";
+
+        // Building the parameters to the web service
+        String parameters = str_origin + "&" + str_dest + "&" + sensor + "&" + mode;
+
+        // Output format
+        String output = "json";
+
+        // Building the url to the web service
+        String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters;
+
+
+        return url;
     }
 
     public void goToPay(View view)
@@ -340,5 +485,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 }
+
+
 
 //https://maps.googleapis.com/maps/api/place/findplacefromtext/json?&inputtype=textquery&input=apollo&key=AIzaSyBt6dqua_Hr_AhCk0gJm9Kxh5X6DJBLYz8&fields=formatted_address,geometry,icon,name,permanently_closed,photos,place_id,plus_code,types&sessiontoken=12345

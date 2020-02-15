@@ -82,9 +82,9 @@ public class SignUpActivity extends AppCompatActivity
                                     Toast.makeText(getApplicationContext(), "User Data saved", Toast.LENGTH_LONG).show();
                                     Intent i = new Intent(SignUpActivity.this, MainPageActivity.class);
                                     startActivity(i);
-
-
-                                } else {
+                                }
+                                else
+                                {
                                     Toast.makeText(getApplicationContext(), "User Data could not be saved", Toast.LENGTH_LONG).show();
                                 }
 
